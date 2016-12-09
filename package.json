@@ -12,7 +12,9 @@
   "author": "amit",
   "license": "ISC",
   "dependencies": {
+    "bcrypt-nodejs": "0.0.3",
     "express": "^4.14.0",
+    "mongoose": "^4.7.2",
     "morgan": "^1.7.0"
   }
 }
