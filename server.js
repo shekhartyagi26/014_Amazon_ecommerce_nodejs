@@ -1,10 +1,20 @@
 var express = require('express');
+var morgan = require('morgan');// use for console all request for user.
+
 
 var app = express();
+
+// Middleware 
+app.use(morgan('dev'));// this is a way to invoking morgan object. using morgan.
+
 
 app.get('/name', function(req, res){
 	var name = "amit";
     res.json("my name is " + name);
+});
+
+app.get('/catname', function(req, res){
+   res.json('batman');
 });
 
 // *** use for post data to server that create data in db ***
