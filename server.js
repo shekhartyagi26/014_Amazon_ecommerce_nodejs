@@ -2,11 +2,20 @@ var express = require('express');
 var morgan = require('morgan');// use for console all request for user.
 var mongoose = require('mongoose');
 var bodyParser = require('body-parser');
+var ejs = require('ejs');
+var engine = require('ejs-mate');// need this to create flexible web. so we add this also with ejs
+var session = require('express-session');// 
+var cookieParser = require('cookie-parser');// cookies to store session id
+var flash = require('express-flash');
+var passport = require('passport');
+var MongoStore = require('connect-mongo/es5')(session);
+
+var secret = require('./config/secret');
 var User = require('./models/user');
 
 var app = express();
 
-mongoose.connect('mongodb://ammy:suhag007@ds129038.mlab.com:29038/dummy_ecommerce_amit', function(err){
+mongoose.connect(secret.database, function(err){
 	if (err) {
 		console.log(err);
 	}else{
@@ -15,35 +24,39 @@ mongoose.connect('mongodb://ammy:suhag007@ds129038.mlab.com:29038/dummy_ecommerc
 })
 
 // Middleware 
+app.use(express.static(__dirname +'/public'));//use to add and parse css file in public folder.how to use bootstrap
 app.use(morgan('dev'));// this is a way to invoking morgan object. using morgan.
 app.use(bodyParser.json());// now our express can parse json data format coming from user
-app.use(bodyParser.urlencoded({ extended: true}));// in postman this will only works for x-www-formdata-urlencoded
+app.use(bodyParser.urlencoded({ extended: true }));// in postman this will only works for x-www-formdata-urlencoded
+app.use(cookieParser());
+app.use(session({
+    resave: true,
+    saveUninitialized: true,
+    secret: secret.secretKey,
+    store: new MongoStore({ url: secret.database, autoReconnect: true})
+}));
+app.use(flash());
+app.use(passport.initialize());
+app.use(passport.session());
+
+app.engine('ejs', engine);
+app.set('view engine', 'ejs');
 
 
-app.post('/create-user', function(req, res){
-	var user = new User();
-
-	user.profile.name = req.body.name;
-	user.password = req.body.password;
-	user.email = req.body.email;
-
-	user.save(function(err){
-		if(err) next(err);
-
-		res.json('Sucessfully created a new user');
-	});
-});
-
+var mainRoutes = require('./routes/main');
+var userRoutes = require('./routes/user');
+app.use(mainRoutes);
+app.use(userRoutes);
 // *** use for post data to server that create data in db ***
 // app.post();
 
 // *** use for updating data **
 // app.put(); 
 
-// *** use for delete data on server ***
+// *** use for  delete data on server ***
 // app.delete();
 
-app.listen(3000, function(err){
+app.listen(secret.port, function(err){
 	if(err) throw err;
-	console.log("server is running on 3000");
+	console.log("server is running on " + secret.port);
 });
