@@ -4,3 +4,7 @@ body {
 #navbar-gap{
 	margin-top: -47px;
 }
+
+.product-image{
+	width: 100%;
+}
